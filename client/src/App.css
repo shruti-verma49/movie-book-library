@@ -1,0 +1,23 @@
+/* Component styles for the library go here.
+   Temporary test-page styles for now: */
+
+.test-page {
+  padding: 80px 0;
+}
+
+.test-page h1 {
+  font-size: clamp(40px, 7vw, 72px);
+  margin: 16px 0;
+}
+
+.test-page p {
+  color: var(--ink-soft);
+  max-width: 48ch;
+}
+
+.test-page .counts {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-weight: 500;
+}
