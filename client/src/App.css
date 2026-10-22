@@ -1,5 +1,144 @@
-/* Component styles for the library go here.
-   Temporary test-page styles for now: */
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ivory);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 72px;
+}
+
+/* Wordmark: serif, with a burgundy ampersand */
+.wordmark {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.wordmark span {
+  color: var(--burgundy);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Navigation tabs */
+.nav-links {
+  display: flex;
+  gap: 28px;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  padding: 6px 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--ink);
+}
+
+.nav-link.active {
+  color: var(--burgundy);
+  border-bottom-color: var(--burgundy);
+}
+
+/* Search box and Add button */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-search {
+  width: 220px;
+  padding: 8px 2px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.nav-search::placeholder {
+  color: var(--ink-soft);
+}
+
+.nav-search:focus {
+  outline: none;
+  border-bottom-color: var(--burgundy);
+}
+
+/* Main button style, reused across the site */
+.btn-primary {
+  background: var(--burgundy);
+  color: var(--ivory);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--burgundy-dark);
+}
+
+/* Tablet and mobile: wordmark on top, then tabs, then search + button */
+@media (max-width: 860px) {
+  .navbar-inner {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding-top: 14px;
+    padding-bottom: 12px;
+    min-height: 0;
+  }
+
+  .nav-links {
+    order: 2;
+    width: 100%;
+    gap: 22px;
+  }
+
+  .nav-actions {
+    order: 3;
+    width: 100%;
+  }
+
+  .nav-search {
+    flex: 1;
+    width: auto;
+  }
+}
+
+/* =========================================================
+   TEMPORARY test-page styles (removed when we build the hero)
+   ========================================================= */
 
 .test-page {
   padding: 80px 0;
