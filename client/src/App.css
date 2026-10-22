@@ -109,7 +109,92 @@
   background: var(--burgundy-dark);
 }
 
-/* Tablet and mobile: wordmark on top, then tabs, then search + button */
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+  padding: 72px 0 64px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 64px;
+  align-items: end;
+}
+
+.hero-text .eyebrow {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.hero-text h1 {
+  font-size: clamp(44px, 7vw, 84px);
+  letter-spacing: -0.02em;
+}
+
+.hero-lead {
+  margin-top: 24px;
+  max-width: 44ch;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.hero-feature {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--burgundy);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+
+.feature-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.feature-title {
+  margin-top: 14px;
+  font-size: 28px;
+}
+
+.feature-meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.feature-creator {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.feature-rating {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--burgundy);
+}
+
+/* Temporary block for the counts line until we build the overview */
+.temp-counts {
+  padding: 32px 0;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+/* =========================================================
+   RESPONSIVE (tablet and mobile)
+   ========================================================= */
+
 @media (max-width: 860px) {
   .navbar-inner {
     flex-wrap: wrap;
@@ -134,29 +219,13 @@
     flex: 1;
     width: auto;
   }
-}
 
-/* =========================================================
-   TEMPORARY test-page styles (removed when we build the hero)
-   ========================================================= */
+  .hero {
+    padding: 48px 0 44px;
+  }
 
-.test-page {
-  padding: 80px 0;
-}
-
-.test-page h1 {
-  font-size: clamp(40px, 7vw, 72px);
-  margin: 16px 0;
-}
-
-.test-page p {
-  color: var(--ink-soft);
-  max-width: 48ch;
-}
-
-.test-page .counts {
-  margin-top: 32px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-  font-weight: 500;
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
 }
