@@ -1,0 +1,11 @@
+# Python backend
+server/venv/
+__pycache__/
+*.pyc
+
+# Secrets: never commit these
+.env
+
+# OS files
+Thumbs.db
+.DS_Store
