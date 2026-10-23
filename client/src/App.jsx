@@ -2,17 +2,13 @@ import { useState } from "react";
 import { sampleItems } from "./data/sampleItems";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import LibraryOverview from "./components/LibraryOverview";
 import Catalogue from "./components/Catalogue";
 import "./App.css";
 
 function App() {
   const [activeTab, setActiveTab] = useState("all"); // "all", "movie" or "book"
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Counts calculated from the data, not typed in by hand
-  const total = sampleItems.length;
-  const movies = sampleItems.filter((item) => item.type === "movie").length;
-  const books = sampleItems.filter((item) => item.type === "book").length;
 
   // Highest-rated item (null if the library is empty)
   const topItem =
@@ -59,14 +55,12 @@ function App() {
 
       <Hero topItem={topItem} />
 
-      {/* TEMPORARY: replaced by the Library Overview in a later step */}
-      <div className="container temp-counts">
-        {total} items · {movies} movies · {books} books
-      </div>
+      {/* The overview always describes the whole library, not the filtered view */}
+      <LibraryOverview items={sampleItems} />
 
       <Catalogue
         items={visibleItems}
-        totalCount={total}
+        totalCount={sampleItems.length}
         onClear={handleClear}
       />
     </>
