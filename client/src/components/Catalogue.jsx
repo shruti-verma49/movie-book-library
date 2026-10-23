@@ -1,11 +1,13 @@
 import ItemCard from "./ItemCard";
 
 // The "The Collection" section.
-// items      = the items to show (already filtered by App.jsx)
+// items      = the items to show (already filtered and sorted by App.jsx)
 // totalCount = how many items exist in the whole library
-// onClear    = function that resets the search and the tab
+// onClear    = function that resets the search, tab and filters
+// children   = anything placed inside <Catalogue> ... </Catalogue>
+//              (we use it for the filter bar)
 
-function Catalogue({ items, totalCount, onClear }) {
+function Catalogue({ items, totalCount, onClear, children }) {
   return (
     <section className="catalogue" id="collection">
       <div className="container">
@@ -15,6 +17,8 @@ function Catalogue({ items, totalCount, onClear }) {
             Showing {items.length} of {totalCount}
           </p>
         </div>
+
+        {children}
 
         {items.length > 0 ? (
           <div className="catalogue-grid">
