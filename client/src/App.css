@@ -561,3 +561,189 @@
     min-width: 0;
   }
 }
+
+/* =========================================================
+   MODAL AND FORM
+   ========================================================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+  background: rgba(31, 29, 27, 0.55);
+  overflow-y: auto;
+}
+
+.modal {
+  width: 100%;
+  max-width: 560px;
+  background: var(--ivory);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--burgundy);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.modal-header .eyebrow {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.modal-header h2 {
+  font-size: 30px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.modal-close:hover {
+  color: var(--ink);
+}
+
+/* Form fields */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.form-field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 10px 2px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-bottom-color: var(--burgundy);
+}
+
+.form-field input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.field-error {
+  font-size: 13px;
+  color: var(--burgundy);
+}
+
+/* Buttons at the bottom of the form */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--ink-soft);
+}
+
+@media (max-width: 520px) {
+  .modal {
+    padding: 24px 20px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   CARD ACTIONS (Edit / Delete)
+   ========================================================= */
+
+.item-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.item-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.item-action:hover {
+  color: var(--ink);
+}
+
+.item-action.danger:hover {
+  color: var(--burgundy);
+}

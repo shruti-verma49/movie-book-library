@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 // One card in the catalogue. It receives a single item (a movie or a book).
+// onEdit and onDelete are optional. A button is only shown when its function
+// is provided, so the card never has a button that does nothing.
 
-function ItemCard({ item }) {
+function ItemCard({ item, onEdit, onDelete }) {
   // If the image link is empty or fails to load, we show a designed fallback
   const [imageFailed, setImageFailed] = useState(false);
 
@@ -41,6 +43,31 @@ function ItemCard({ item }) {
         <p className="item-meta">
           {item.genre} · {item.year}
         </p>
+
+        {(onEdit || onDelete) && (
+          <div className="item-actions">
+            {onEdit && (
+              <button
+                type="button"
+                className="item-action"
+                onClick={() => onEdit(item)}
+                aria-label={`Edit ${item.title}`}
+              >
+                Edit
+              </button>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                className="item-action danger"
+                onClick={() => onDelete(item)}
+                aria-label={`Delete ${item.title}`}
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );
