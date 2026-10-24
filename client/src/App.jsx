@@ -5,12 +5,15 @@ import Hero from "./components/Hero";
 import LibraryOverview from "./components/LibraryOverview";
 import FilterBar from "./components/FilterBar";
 import Catalogue from "./components/Catalogue";
+import Pagination from "./components/Pagination";
 import ItemFormModal from "./components/ItemFormModal";
 import ConfirmDialog from "./components/ConfirmDialog";
 import "./App.css";
 
+const PAGE_SIZE = 2; // items per page
+
 function App() {
-   // The library itself, loaded from the backend (MongoDB).
+  // The library itself, loaded from the backend (MongoDB).
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -28,13 +31,16 @@ function App() {
   const [genre, setGenre] = useState("all");
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState("title-asc");
+  const [page, setPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0); // matches across all pages
+  const [totalPages, setTotalPages] = useState(0);
 
   // Pop-ups
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null); // null = adding a new item
   const [itemToDelete, setItemToDelete] = useState(null); // null = no pop-up
 
-    // Wait 300 ms after the user stops typing before searching, so we don't
+  // Wait 300 ms after the user stops typing before searching, so we don't
   // send a request for every single letter
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -58,13 +64,21 @@ function App() {
       minRating,
       sortBy: sortField,
       order: sortDirection,
-      limit: 100, // TEMPORARY: pagination controls arrive in Step 52
+      page,
+      limit: PAGE_SIZE,
     })
       .then((data) => {
-        if (!cancelled) {
-          setItems(data.items);
-          setLoadError("");
+        if (cancelled) return;
+        // If the page no longer exists (for example its last item was
+        // deleted), go back to the last page that does
+        if (data.totalPages > 0 && page > data.totalPages) {
+          setPage(data.totalPages);
+          return;
         }
+        setItems(data.items);
+        setTotalItems(data.total);
+        setTotalPages(data.totalPages);
+        setLoadError("");
       })
       .catch((error) => {
         if (!cancelled) setLoadError(error.message);
@@ -76,7 +90,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, activeTab, genre, minRating, sortField, sortDirection, reloadKey]);
+  }, [debouncedSearch, activeTab, genre, minRating, sortField, sortDirection, page, reloadKey]);
 
   // The genre dropdown comes from the backend, so it always lists every genre
   const [genres, setGenres] = useState([]);
@@ -87,13 +101,23 @@ function App() {
       .catch(() => {}); // if this fails, the dropdown simply stays empty
   }, [reloadKey]);
 
-  // Highest-rated item (null if the library is empty)
+  // A new search, tab, genre, rating or sort starts again from page 1
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, activeTab, genre, minRating, sortBy]);
+
+  function handlePageChange(newPage) {
+    setPage(newPage);
+    document.getElementById("collection")?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // TEMPORARY until Step 53: worked out from the current page only
   const topItem =
     items.length > 0
       ? items.reduce((best, item) => (item.rating > best.rating ? item : best))
       : null;
 
-    // The backend already searched, filtered and sorted, so we show what it sent
+  // The backend already searched, filtered and sorted, so we show what it sent
   const visibleItems = items;
   const query = searchQuery.trim();
 
@@ -110,7 +134,7 @@ function App() {
     setSortBy("title-asc");
   }
 
-  // ---------- Add and edit ----------
+  // ---------- Add and edit (TEMPORARY: not saved to the database until Step 54) ----------
 
   function handleAddClick() {
     setEditingItem(null);
@@ -130,24 +154,18 @@ function App() {
   // Called by the form when every field is valid
   function handleSave(data) {
     if (editingItem) {
-      // Edit: replace the matching item, keep every other item as it was
       setItems((previous) =>
         previous.map((item) =>
           item.id === editingItem.id ? { ...item, ...data } : item
         )
       );
     } else {
-      // Add: TEMPORARY id = highest existing id + 1 (the database will
-      // create real ids later)
-      setItems((previous) => {
-        const nextId = previous.reduce((max, item) => Math.max(max, item.id), 0) + 1;
-        return [...previous, { id: nextId, ...data }];
-      });
+      setItems((previous) => [...previous, { id: `temp-${Date.now()}`, ...data }]);
     }
     handleCloseForm();
   }
 
-  // ---------- Delete ----------
+  // ---------- Delete (TEMPORARY: not saved to the database until Step 54) ----------
 
   function handleDeleteClick(item) {
     setItemToDelete(item); // opens the confirmation pop-up
@@ -172,10 +190,12 @@ function App() {
 
       <Hero topItem={topItem} />
 
-      {/* The overview always describes the whole library, not the filtered view */}
+      {/* TEMPORARY until Step 53: counts only the current page */}
       <LibraryOverview items={items} />
 
-            {isLoading && <div className="container status-message">Loading your library…</div>}
+      {isLoading && (
+        <div className="container status-message">Loading your library…</div>
+      )}
 
       {!isLoading && loadError && (
         <div className="container status-message">
@@ -187,27 +207,33 @@ function App() {
       )}
 
       {!isLoading && !loadError && (
-
-      <Catalogue
-        items={visibleItems}
-        totalCount={items.length}
-        onClear={handleClear}
-        onEdit={handleEditClick}
-        onDelete={handleDeleteClick}
-      >
-        <FilterBar
-          genres={genres}
-          genre={genre}
-          onGenreChange={setGenre}
-          minRating={minRating}
-          onMinRatingChange={setMinRating}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          onReset={handleClear}
-          hasActiveFilters={hasActiveFilters}
-        />
-      </Catalogue>
-
+        <Catalogue
+          items={visibleItems}
+          totalCount={totalItems}
+          pagination={
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              total={totalItems}
+              onPageChange={handlePageChange}
+            />
+          }
+          onClear={handleClear}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+        >
+          <FilterBar
+            genres={genres}
+            genre={genre}
+            onGenreChange={setGenre}
+            minRating={minRating}
+            onMinRatingChange={setMinRating}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            onReset={handleClear}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </Catalogue>
       )}
 
       {isFormOpen && (

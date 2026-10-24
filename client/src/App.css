@@ -762,3 +762,40 @@
   margin-bottom: 20px;
   color: var(--burgundy);
 }
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.pagination .btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination-info {
+    order: -1;
+    width: 100%;
+  }
+}

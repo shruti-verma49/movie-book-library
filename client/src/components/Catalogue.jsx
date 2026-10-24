@@ -9,7 +9,7 @@ import ItemCard from "./ItemCard";
 // children   = anything placed inside <Catalogue> ... </Catalogue>
 //              (we use it for the filter bar)
 
-function Catalogue({ items, totalCount, onClear, onEdit, onDelete, children }) {
+function Catalogue({ items, totalCount, onClear, onEdit, onDelete, children, pagination }) {
   return (
     <section className="catalogue" id="collection">
       <div className="container">
@@ -42,6 +42,7 @@ function Catalogue({ items, totalCount, onClear, onEdit, onDelete, children }) {
             </button>
           </div>
         )}
+        {pagination}
       </div>
     </section>
   );
