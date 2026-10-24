@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import ping_database
+from app.items import router as items_router
 
 # Read settings from a .env file if one exists
 load_dotenv()
@@ -32,6 +33,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Plug in the /api/items endpoints
+app.include_router(items_router)
 
 
 @app.get("/health")
