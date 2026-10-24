@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { sampleItems } from "./data/sampleItems";
+import { useState, useEffect } from "react";
+import { getItems, getGenres } from "./api/api";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import LibraryOverview from "./components/LibraryOverview";
@@ -10,10 +10,17 @@ import ConfirmDialog from "./components/ConfirmDialog";
 import "./App.css";
 
 function App() {
-  // The library itself. TEMPORARY: it starts from the sample data and lives
-  // only in the browser's memory, so a refresh resets it. In the backend
-  // phase this will be loaded from, and saved to, the database.
-  const [items, setItems] = useState(sampleItems);
+   // The library itself, loaded from the backend (MongoDB).
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0); // changing it triggers a reload
+
+  function handleRetry() {
+    setIsLoading(true);
+    setLoadError("");
+    setReloadKey((key) => key + 1);
+  }
 
   // Controls the user can change
   const [activeTab, setActiveTab] = useState("all"); // "all", "movie" or "book"
@@ -27,44 +34,68 @@ function App() {
   const [editingItem, setEditingItem] = useState(null); // null = adding a new item
   const [itemToDelete, setItemToDelete] = useState(null); // null = no pop-up
 
+    // Wait 300 ms after the user stops typing before searching, so we don't
+  // send a request for every single letter
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // The sort choice looks like "rating-desc": split it into field and direction
+  const [sortField, sortDirection] = sortBy.split("-");
+
+  // Ask the backend for the items that match the current controls.
+  // It runs again whenever any of them changes.
+  useEffect(() => {
+    let cancelled = false; // ignore an old answer if the controls changed again
+
+    getItems({
+      search: debouncedSearch,
+      type: activeTab,
+      genre,
+      minRating,
+      sortBy: sortField,
+      order: sortDirection,
+      limit: 100, // TEMPORARY: pagination controls arrive in Step 52
+    })
+      .then((data) => {
+        if (!cancelled) {
+          setItems(data.items);
+          setLoadError("");
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) setLoadError(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedSearch, activeTab, genre, minRating, sortField, sortDirection, reloadKey]);
+
+  // The genre dropdown comes from the backend, so it always lists every genre
+  const [genres, setGenres] = useState([]);
+
+  useEffect(() => {
+    getGenres()
+      .then(setGenres)
+      .catch(() => {}); // if this fails, the dropdown simply stays empty
+  }, [reloadKey]);
+
   // Highest-rated item (null if the library is empty)
   const topItem =
     items.length > 0
       ? items.reduce((best, item) => (item.rating > best.rating ? item : best))
       : null;
 
-  // The genre dropdown is built from the real data: unique genres, A to Z
-  const genres = [...new Set(items.map((item) => item.genre))].sort();
-
-  // 1. Filter: tab, search text, genre and minimum rating must all match
-  const query = searchQuery.trim().toLowerCase();
-
-  const filteredItems = items
-    .filter((item) => activeTab === "all" || item.type === activeTab)
-    .filter(
-      (item) =>
-        query === "" ||
-        item.title.toLowerCase().includes(query) ||
-        item.genre.toLowerCase().includes(query) ||
-        item.creator.toLowerCase().includes(query)
-    )
-    .filter((item) => genre === "all" || item.genre === genre)
-    .filter((item) => item.rating >= minRating);
-
-  // 2. Sort the filtered list (the choice looks like "rating-desc")
-  const [sortField, sortDirection] = sortBy.split("-");
-
-  const visibleItems = [...filteredItems].sort((a, b) => {
-    let result = 0;
-    if (sortField === "title") {
-      result = a.title.localeCompare(b.title);
-    } else if (sortField === "rating") {
-      result = a.rating - b.rating;
-    } else if (sortField === "year") {
-      result = a.year - b.year;
-    }
-    return sortDirection === "desc" ? -result : result;
-  });
+    // The backend already searched, filtered and sorted, so we show what it sent
+  const visibleItems = items;
+  const query = searchQuery.trim();
 
   // Is anything currently filtering the list?
   const hasActiveFilters =
@@ -144,6 +175,19 @@ function App() {
       {/* The overview always describes the whole library, not the filtered view */}
       <LibraryOverview items={items} />
 
+            {isLoading && <div className="container status-message">Loading your library…</div>}
+
+      {!isLoading && loadError && (
+        <div className="container status-message">
+          <p>{loadError}</p>
+          <button type="button" className="btn-primary" onClick={handleRetry}>
+            Try again
+          </button>
+        </div>
+      )}
+
+      {!isLoading && !loadError && (
+
       <Catalogue
         items={visibleItems}
         totalCount={items.length}
@@ -163,6 +207,8 @@ function App() {
           hasActiveFilters={hasActiveFilters}
         />
       </Catalogue>
+
+      )}
 
       {isFormOpen && (
         <ItemFormModal

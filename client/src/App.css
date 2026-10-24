@@ -747,3 +747,18 @@
 .item-action.danger:hover {
   color: var(--burgundy);
 }
+
+/* =========================================================
+   LOADING AND ERROR MESSAGES
+   ========================================================= */
+
+.status-message {
+  padding: 64px 24px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.status-message p {
+  margin-bottom: 20px;
+  color: var(--burgundy);
+}
