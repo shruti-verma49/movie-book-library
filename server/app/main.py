@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Read settings from a .env file if one exists (optional at this stage)
+from app.database import ping_database
+
+# Read settings from a .env file if one exists
 load_dotenv()
 
 app = FastAPI(
@@ -36,3 +38,14 @@ app.add_middleware(
 def health_check():
     """Simple check that the backend is running."""
     return {"status": "ok", "message": "Frame & Page backend is running"}
+
+
+@app.get("/health/db")
+def database_health_check():
+    """Check that the backend can reach MongoDB."""
+    connected, message = ping_database()
+    return {
+        "status": "ok" if connected else "error",
+        "database_connected": connected,
+        "message": message,
+    }
