@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getItems, getGenres } from "./api/api";
+import { getItems, getGenres, getStats } from "./api/api";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import LibraryOverview from "./components/LibraryOverview";
@@ -10,7 +10,7 @@ import ItemFormModal from "./components/ItemFormModal";
 import ConfirmDialog from "./components/ConfirmDialog";
 import "./App.css";
 
-const PAGE_SIZE = 2; // items per page
+const PAGE_SIZE = 12; // items per page
 
 function App() {
   // The library itself, loaded from the backend (MongoDB).
@@ -101,6 +101,15 @@ function App() {
       .catch(() => {}); // if this fails, the dropdown simply stays empty
   }, [reloadKey]);
 
+    // Library-wide numbers for the overview strip and the "Top rated" panel
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getStats()
+      .then(setStats)
+      .catch(() => {}); // if this fails, the numbers stay empty
+  }, [reloadKey]);
+
   // A new search, tab, genre, rating or sort starts again from page 1
   useEffect(() => {
     setPage(1);
@@ -110,12 +119,6 @@ function App() {
     setPage(newPage);
     document.getElementById("collection")?.scrollIntoView({ behavior: "smooth" });
   }
-
-  // TEMPORARY until Step 53: worked out from the current page only
-  const topItem =
-    items.length > 0
-      ? items.reduce((best, item) => (item.rating > best.rating ? item : best))
-      : null;
 
   // The backend already searched, filtered and sorted, so we show what it sent
   const visibleItems = items;
@@ -188,10 +191,10 @@ function App() {
         onAddClick={handleAddClick}
       />
 
-      <Hero topItem={topItem} />
+            <Hero topItem={stats ? stats.topItem : null} />
 
-      {/* TEMPORARY until Step 53: counts only the current page */}
-      <LibraryOverview items={items} />
+      {/* The overview always describes the whole library, not the filtered view */}
+      <LibraryOverview stats={stats} />
 
       {isLoading && (
         <div className="container status-message">Loading your library…</div>
