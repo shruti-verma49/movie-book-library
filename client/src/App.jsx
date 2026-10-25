@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getItems, getGenres, getStats } from "./api/api";
+import { getItems, getGenres, getStats, createItem, updateItem, deleteItem } from "./api/api";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import LibraryOverview from "./components/LibraryOverview";
@@ -39,6 +39,9 @@ function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null); // null = adding a new item
   const [itemToDelete, setItemToDelete] = useState(null); // null = no pop-up
+    const [isSaving, setIsSaving] = useState(false); // true while the form is saving
+  const [formError, setFormError] = useState(""); // error shown inside the form
+  const [actionError, setActionError] = useState(""); // error shown above the page
 
   // Wait 300 ms after the user stops typing before searching, so we don't
   // send a request for every single letter
@@ -149,36 +152,45 @@ function App() {
     setIsFormOpen(true);
   }
 
-  function handleCloseForm() {
+    function handleCloseForm() {
     setIsFormOpen(false);
     setEditingItem(null);
+    setFormError("");
   }
 
-  // Called by the form when every field is valid
-  function handleSave(data) {
-    if (editingItem) {
-      setItems((previous) =>
-        previous.map((item) =>
-          item.id === editingItem.id ? { ...item, ...data } : item
-        )
-      );
-    } else {
-      setItems((previous) => [...previous, { id: `temp-${Date.now()}`, ...data }]);
+    // Called by the form when every field is valid
+  async function handleSave(data) {
+    setIsSaving(true);
+    setFormError("");
+    try {
+      if (editingItem) {
+        await updateItem(editingItem.id, data);
+      } else {
+        await createItem(data);
+      }
+      handleCloseForm();
+      setReloadKey((key) => key + 1); // reload items, genres and stats
+    } catch (error) {
+      setFormError(error.message); // the form stays open so nothing is lost
+    } finally {
+      setIsSaving(false);
     }
-    handleCloseForm();
   }
 
-  // ---------- Delete (TEMPORARY: not saved to the database until Step 54) ----------
 
   function handleDeleteClick(item) {
     setItemToDelete(item); // opens the confirmation pop-up
   }
 
-  function handleConfirmDelete() {
-    setItems((previous) =>
-      previous.filter((item) => item.id !== itemToDelete.id)
-    );
+   async function handleConfirmDelete() {
+    const item = itemToDelete;
     setItemToDelete(null);
+    try {
+      await deleteItem(item.id);
+      setReloadKey((key) => key + 1); // reload items, genres and stats
+    } catch (error) {
+      setActionError(error.message);
+    }
   }
 
   return (
@@ -190,6 +202,15 @@ function App() {
         onSearchChange={setSearchQuery}
         onAddClick={handleAddClick}
       />
+
+            {actionError && (
+        <div className="container action-error" role="alert">
+          <p>{actionError}</p>
+          <button type="button" className="item-action" onClick={() => setActionError("")}>
+            Dismiss
+          </button>
+        </div>
+      )}
 
             <Hero topItem={stats ? stats.topItem : null} />
 
@@ -243,6 +264,8 @@ function App() {
         <ItemFormModal
           key={editingItem ? editingItem.id : "new"}
           item={editingItem}
+          submitError={formError}
+          isSaving={isSaving}
           genres={genres}
           onSave={handleSave}
           onClose={handleCloseForm}

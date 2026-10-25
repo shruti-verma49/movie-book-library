@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 // onSave  = called with the cleaned-up form data when everything is valid
 // onClose = called when the user cancels or closes the pop-up
 
-function ItemFormModal({ item, genres, onSave, onClose }) {
+function ItemFormModal({ item, genres, onSave, onClose, submitError = "", isSaving = false }) {
   const isEditing = item !== null;
   const currentYear = new Date().getFullYear();
 
@@ -222,12 +222,14 @@ function ItemFormModal({ item, genres, onSave, onClose }) {
             {errors.imageUrl && <p className="field-error">{errors.imageUrl}</p>}
           </div>
 
+            {submitError && <p className="field-error">{submitError}</p>}
+
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              {isEditing ? "Save changes" : "Add to Library"}
+            <button type="submit" className="btn-primary" disabled={isSaving}>
+              {isSaving ? "Saving…" : isEditing ? "Save changes" : "Add to Library"}
             </button>
           </div>
         </form>

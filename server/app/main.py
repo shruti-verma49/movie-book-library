@@ -17,19 +17,18 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# CORS: the browser only lets our React app (running on port 5173) talk to
-# this backend if the backend says so. We allow only our own development
-# addresses, not every website.
+# CORS: the browser only lets our React app talk to this backend if the
+# backend says so. We allow:
+#  - the address in FRONTEND_ORIGIN (used after deployment), and
+#  - localhost / 127.0.0.1 on any port (Vite moves to 5174, 5175... when
+#    another dev server already uses 5173).
+# No other website is allowed.
 frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
-
-allowed_origins = [
-    frontend_origin,
-    "http://127.0.0.1:5173",
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=[frontend_origin],
+    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1):\d+$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
