@@ -8,6 +8,8 @@ function Navbar({
   searchQuery,
   onSearchChange,
   onAddClick,
+  theme,
+  onThemeToggle,
 }) {
   const tabs = [
     { id: "all", label: "Discover" },
@@ -44,6 +46,16 @@ function Navbar({
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
           />
+           {onThemeToggle && (
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={onThemeToggle}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            >
+              {theme === "dark" ? "Light" : "Dark"}
+            </button>
+          )}
           <button type="button" className="btn-primary" onClick={onAddClick}>
             Add to Library
           </button>

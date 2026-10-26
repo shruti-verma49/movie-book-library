@@ -1018,3 +1018,72 @@
     grid-column: 1 / -1;
   }
 }
+
+/* =========================================================
+   DARK THEME: component adjustments
+   Most colours come from the variables in index.css. These rules cover the
+   few places that used fixed colours or need a different treatment.
+   ========================================================= */
+
+/* Buttons keep the deep burgundy fill with light text */
+:root[data-theme="dark"] .btn-primary {
+  background: #8a3a47;
+  color: #f3eee6;
+}
+
+:root[data-theme="dark"] .btn-primary:hover {
+  background: #9d4a58;
+}
+
+/* Shadows and the pop-up backdrop need to be darker on a dark page */
+:root[data-theme="dark"] .item-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] .modal-backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* Fallback covers: films darker than the page, books lighter */
+:root[data-theme="dark"] .cover-fallback.film {
+  background: #0e0c0b;
+  color: #ece6db;
+}
+
+:root[data-theme="dark"] .cover-fallback.book {
+  background: #2a2622;
+  color: #ece6db;
+}
+
+/* Native dropdown lists */
+:root[data-theme="dark"] select option {
+  background-color: #211e1b;
+  color: #ece6db;
+}
+
+/* Theme toggle button (added to the navbar in Part 2) */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+
+@media (max-width: 860px) {
+  .nav-search {
+    min-width: 0;
+  }
+}

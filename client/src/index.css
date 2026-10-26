@@ -89,3 +89,26 @@ img {
   text-transform: uppercase;
   color: var(--burgundy);
 }
+
+/* =========================================================
+   DARK THEME
+   The theme is chosen by the data-theme attribute on <html>.
+   Light is the default; in dark only the colour tokens change.
+   ========================================================= */
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ivory: #171513;
+  --paper: #211e1b;
+  --border: #3d3832;
+  --ink: #ece6db;
+  --ink-soft: #a39b8f;
+  --burgundy: #cc7a88;
+  --burgundy-dark: #dc949f;
+  --sage: #8f9f82;
+}

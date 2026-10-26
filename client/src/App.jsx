@@ -49,6 +49,44 @@ function App() {
       // storage unavailable: the choice just won't be remembered
     }
   }
+      // Light or dark theme. The page script in index.html has already set
+  // data-theme on <html>, so we start from what it chose.
+  const [theme, setTheme] = useState(() =>
+    document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"
+  );
+
+  function handleThemeToggle() {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    setTheme(next);
+    try {
+      localStorage.setItem("theme", next); // an explicit choice is remembered
+    } catch {
+      // storage unavailable: the choice just won't be remembered
+    }
+  }
+
+  // With no saved choice, follow the system setting, including later changes
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function handleSystemChange(event) {
+      let saved = null;
+      try {
+        saved = localStorage.getItem("theme");
+      } catch {
+        // ignore
+      }
+      if (saved === "light" || saved === "dark") return; // the user chose
+      const next = event.matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", next);
+      setTheme(next);
+    }
+
+    media.addEventListener("change", handleSystemChange);
+    return () => media.removeEventListener("change", handleSystemChange);
+  }, []);
+  
   const [sortBy, setSortBy] = useState("title-asc");
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0); // matches across all pages
@@ -295,6 +333,8 @@ function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onAddClick={handleAddClick}
+        theme={theme}
+        onThemeToggle={handleThemeToggle}
       />
 
             {actionError && (
