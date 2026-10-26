@@ -4,7 +4,7 @@ import { useState } from "react";
 // onEdit and onDelete are optional. A button is only shown when its function
 // is provided, so the card never has a button that does nothing.
 
-function ItemCard({ item, onEdit, onDelete }) {
+function ItemCard({ item, onEdit, onDelete, onToggleFavourite, onSetStatus}) {
   // If the image link is empty or fails to load, we show a designed fallback
   const [imageFailed, setImageFailed] = useState(false);
 
@@ -44,7 +44,35 @@ function ItemCard({ item, onEdit, onDelete }) {
           {item.genre} · {item.year}
         </p>
 
-        {(onEdit || onDelete) && (
+        {onSetStatus && (
+          <div className="item-status">
+            <select
+              className="item-status-select"
+              value={item.status || ""}
+              onChange={(event) => onSetStatus(item, event.target.value)}
+              aria-label={`Status of ${item.title}`}
+            >
+              <option value="">{item.status ? "No status" : "Set status"}</option>
+              <option value="want">{isMovie ? "Want to Watch" : "Want to Read"}</option>
+              <option value="in_progress">
+                {isMovie ? "Currently Watching" : "Currently Reading"}
+              </option>
+              <option value="done">{isMovie ? "Watched" : "Read"}</option>
+            </select>
+          </div>
+        )}
+
+        {onSetStatus && !item.status && (
+          <button
+            type="button"
+            className="item-listbtn"
+            onClick={() => onSetStatus(item, "want")}
+          >
+            {isMovie ? "Add to watchlist" : "Add to reading list"}
+          </button>
+        )}
+        
+        {(onEdit || onDelete || onToggleFavourite) && (
           <div className="item-actions">
             {onEdit && (
               <button
@@ -63,7 +91,22 @@ function ItemCard({ item, onEdit, onDelete }) {
                 onClick={() => onDelete(item)}
                 aria-label={`Delete ${item.title}`}
               >
-                Delete
+                                Delete
+              </button>
+            )}
+            {onToggleFavourite && (
+              <button
+                type="button"
+                className={item.favourite ? "item-fav active" : "item-fav"}
+                onClick={() => onToggleFavourite(item)}
+                aria-pressed={Boolean(item.favourite)}
+                aria-label={
+                  item.favourite
+                    ? `Remove ${item.title} from favourites`
+                    : `Add ${item.title} to favourites`
+                }
+              >
+                {item.favourite ? "♥" : "♡"}
               </button>
             )}
           </div>

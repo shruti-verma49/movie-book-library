@@ -8,7 +8,7 @@ from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 
 from app.database import get_db
-from app.schemas import ItemCreate, ItemResponse
+from app.schemas import ItemCreate, ItemPatch, ItemResponse
 
 # A "router" is a group of related endpoints. All of these start with /api/items
 router = APIRouter(prefix="/api/items", tags=["items"])
@@ -66,8 +66,10 @@ def create_item(item: ItemCreate):
     """Add a new movie or book to the library."""
     collection = get_collection()
     document = item.model_dump()
+    document["favourite"] = False
+    document["status"] = ""
     try:
-        collection.insert_one(document)  # MongoDB adds the _id to the document
+        collection.insert_one(document)  # MongoDB adds the _id to the document 
     except PyMongoError:
         raise database_error("save the item to")
     return to_item(document)
@@ -83,6 +85,10 @@ def list_items(
     ),
     genre: str | None = Query(default=None, description="Exact genre, ignoring capitals"),
     min_rating: float = Query(default=0, ge=0, le=10, description="Lowest rating to include"),
+        favourite: bool = Query(default=False, description="Show only favourites"),
+    status_filter: Literal["want", "in_progress", "done"] | None = Query(
+        default=None, alias="status", description="Show only items with this status"
+    ),
     sort_by: Literal["title", "rating", "year"] = "title",
     order: Literal["asc", "desc"] = "asc",
     page: int = Query(default=1, ge=1, description="Page number, starting at 1"),
@@ -108,6 +114,12 @@ def list_items(
 
     if min_rating > 0:
         query["rating"] = {"$gte": min_rating}
+
+    if favourite:
+        query["favourite"] = True
+
+    if status_filter:
+        query["status"] = status_filter
 
     # 2. Sort. The second sort key (_id) keeps the order stable between pages.
     direction = 1 if order == "asc" else -1
@@ -163,6 +175,38 @@ def update_item(item_id: str, item: ItemCreate):
             {"_id": object_id},
             {"$set": item.model_dump()},
             return_document=ReturnDocument.AFTER,  # give back the updated version
+        )
+    except PyMongoError:
+        raise database_error("update the item in")
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found."
+        )
+    return to_item(document)
+
+@router.patch("/{item_id}", response_model=ItemResponse)
+def patch_item(item_id: str, patch: ItemPatch):
+    """Change only the favourite flag and/or the status of an item.
+    Fields that are not sent are left exactly as they are."""
+    collection = get_collection()
+    object_id = parse_id(item_id)
+
+    changes = {
+        key: value
+        for key, value in patch.model_dump(exclude_unset=True).items()
+        if value is not None
+    }
+    if not changes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nothing to update. Send favourite and/or status.",
+        )
+
+    try:
+        document = collection.find_one_and_update(
+            {"_id": object_id},
+            {"$set": changes},
+            return_document=ReturnDocument.AFTER,
         )
     except PyMongoError:
         raise database_error("update the item in")

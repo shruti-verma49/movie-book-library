@@ -823,3 +823,198 @@
   opacity: 0.6;
   cursor: wait;
 }
+
+/* =========================================================
+   FAVOURITE HEART
+   ========================================================= */
+
+.item-fav {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.item-fav:hover,
+.item-fav.active {
+  color: var(--burgundy);
+}
+
+/* =========================================================
+   WATCHLIST / READING LIST BUTTON
+   ========================================================= */
+
+.item-listbtn {
+  display: block;
+  margin-top: 12px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.item-listbtn:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+
+.item-listbtn.listed {
+  color: var(--burgundy);
+  border-color: var(--burgundy);
+}
+
+/* =========================================================
+   STATUS DROPDOWN ON CARDS
+   ========================================================= */
+
+.item-status {
+  margin-top: 12px;
+}
+
+.item-status-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 4px 18px 4px 0;
+  background-color: transparent;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%),
+    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+  background-position: calc(100% - 8px) 55%, calc(100% - 4px) 55%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.item-status-select:hover {
+  border-bottom-color: var(--ink-soft);
+}
+
+.item-status-select:focus {
+  outline: none;
+  border-bottom-color: var(--burgundy);
+}
+
+/* =========================================================
+   GRID / LIST TOGGLE AND LIST ROWS
+   ========================================================= */
+
+.catalogue-tools {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.view-btn {
+  background: none;
+  border: none;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.view-btn:hover {
+  color: var(--ink);
+}
+
+.view-btn.active {
+  background: var(--paper);
+  color: var(--burgundy);
+}
+
+.catalogue-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 190px auto;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row-topline {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.row-meta,
+.row-creator {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.row-title {
+  margin-top: 4px;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.row-rating {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.item-row .item-status {
+  margin-top: 0;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.row-actions .item-fav {
+  margin-left: 0;
+}
+
+@media (max-width: 860px) {
+  .catalogue-header {
+    flex-wrap: wrap;
+  }
+
+  .item-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 16px;
+  }
+
+  .row-status,
+  .row-actions {
+    grid-column: 1 / -1;
+  }
+}

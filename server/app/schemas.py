@@ -3,6 +3,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+# Allowed reading/watching statuses. "" means "not set".
+ItemStatus = Literal["", "want", "in_progress", "done"]
+
 
 class ItemCreate(BaseModel):
     """The data needed to create (or fully update) a movie or a book.
@@ -36,6 +39,16 @@ class ItemCreate(BaseModel):
 
 
 class ItemResponse(ItemCreate):
-    """What the API sends back: the same fields plus the database id."""
+    """What the API sends back: the same fields plus the database id.
+    Older records have no favourite or status, so these get defaults."""
 
     id: str
+    favourite: bool = False
+    status: ItemStatus = ""
+
+
+class ItemPatch(BaseModel):
+    """A partial update: only the fields that are sent are changed."""
+
+    favourite: bool | None = None
+    status: ItemStatus | None = None

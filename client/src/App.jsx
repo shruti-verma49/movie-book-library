@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { getItems, getGenres, getStats, createItem, updateItem, deleteItem } from "./api/api";
+import { useState, useEffect, useRef } from "react";
+import { getItems, getGenres, getStats, createItem, updateItem, deleteItem, patchItem } from "./api/api";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import LibraryOverview from "./components/LibraryOverview";
@@ -30,6 +30,25 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [genre, setGenre] = useState("all");
   const [minRating, setMinRating] = useState(0);
+  const [favouritesOnly, setFavouritesOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState(""); // "" or "want"
+    // Grid or list layout. Only this display preference is kept in the browser.
+  const [view, setView] = useState(() => {
+    try {
+      return localStorage.getItem("libraryView") === "list" ? "list" : "grid";
+    } catch {
+      return "grid";
+    }
+  });
+
+  function handleViewChange(newView) {
+    setView(newView);
+    try {
+      localStorage.setItem("libraryView", newView);
+    } catch {
+      // storage unavailable: the choice just won't be remembered
+    }
+  }
   const [sortBy, setSortBy] = useState("title-asc");
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0); // matches across all pages
@@ -65,6 +84,8 @@ function App() {
       type: activeTab,
       genre,
       minRating,
+      favourite: favouritesOnly,
+      status: statusFilter,
       sortBy: sortField,
       order: sortDirection,
       page,
@@ -93,7 +114,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, activeTab, genre, minRating, sortField, sortDirection, page, reloadKey]);
+  }, [debouncedSearch, activeTab, genre, minRating, favouritesOnly, statusFilter, sortField, sortDirection, page, reloadKey]);
 
   // The genre dropdown comes from the backend, so it always lists every genre
   const [genres, setGenres] = useState([]);
@@ -116,7 +137,7 @@ function App() {
   // A new search, tab, genre, rating or sort starts again from page 1
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, activeTab, genre, minRating, sortBy]);
+  }, [debouncedSearch, activeTab, genre, minRating, favouritesOnly, statusFilter, sortBy]);
 
   function handlePageChange(newPage) {
     setPage(newPage);
@@ -129,7 +150,7 @@ function App() {
 
   // Is anything currently filtering the list?
   const hasActiveFilters =
-    activeTab !== "all" || query !== "" || genre !== "all" || minRating > 0;
+    activeTab !== "all" || query !== "" || genre !== "all" || minRating > 0 || favouritesOnly || statusFilter !== "";
 
   // Put every control back to its starting value
   function handleClear() {
@@ -137,10 +158,83 @@ function App() {
     setSearchQuery("");
     setGenre("all");
     setMinRating(0);
+    setFavouritesOnly("false");
+    setStatusFilter("");
     setSortBy("title-asc");
   }
 
+    // ---------- Favourites ----------
+
+  // Items whose favourite change is still being saved (ignore extra clicks)
+  const pendingFavourites = useRef(new Set());
+
+  async function handleToggleFavourite(item) {
+    if (pendingFavourites.current.has(item.id)) return;
+    pendingFavourites.current.add(item.id);
+
+    const newValue = !item.favourite;
+    setActionError("");
+
+    // Show the change straight away
+    setItems((previous) =>
+      previous.map((entry) =>
+        entry.id === item.id ? { ...entry, favourite: newValue } : entry
+      )
+    );
+
+    try {
+      await patchItem(item.id, { favourite: newValue });
+      // An un-favourited item must leave the "Favourites only" view
+      if (favouritesOnly && !newValue) setReloadKey((key) => key + 1);
+    } catch (error) {
+      // Saving failed: put the old state back and say so
+      setItems((previous) =>
+        previous.map((entry) =>
+          entry.id === item.id ? { ...entry, favourite: item.favourite } : entry
+        )
+      );
+      setActionError(error.message);
+    } finally {
+      pendingFavourites.current.delete(item.id);
+    }
+  }
+
   // ---------- Add and edit (TEMPORARY: not saved to the database until Step 54) ----------
+
+    // ---------- Watchlist and reading list (status "want") ----------
+
+  const pendingStatus = useRef(new Set());
+
+  async function handleSetStatus(item, newStatus) {
+    if (pendingStatus.current.has(item.id)) return;
+    pendingStatus.current.add(item.id);
+    setActionError("");
+
+    // Show the change straight away
+    setItems((previous) =>
+      previous.map((entry) =>
+        entry.id === item.id ? { ...entry, status: newStatus } : entry
+      )
+    );
+
+    try {
+      await patchItem(item.id, { status: newStatus });
+      // An item that no longer matches the "My lists" filter must leave the view
+      if (statusFilter !== "" && newStatus !== statusFilter) {
+        setReloadKey((key) => key + 1);
+      }
+    } catch (error) {
+      // Saving failed: put the old state back and say so
+      setItems((previous) =>
+        previous.map((entry) =>
+          entry.id === item.id ? { ...entry, status: item.status } : entry
+        )
+      );
+      setActionError(error.message);
+    } finally {
+      pendingStatus.current.delete(item.id);
+    }
+  }
 
   function handleAddClick() {
     setEditingItem(null);
@@ -245,6 +339,10 @@ function App() {
           onClear={handleClear}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onToggleFavourite={handleToggleFavourite}
+          onSetStatus={handleSetStatus}
+          view={view}
+          onViewChange={handleViewChange}
         >
           <FilterBar
             genres={genres}
@@ -256,6 +354,11 @@ function App() {
             onSortChange={setSortBy}
             onReset={handleClear}
             hasActiveFilters={hasActiveFilters}
+            favouritesOnly={favouritesOnly}
+            onFavouritesChange={setFavouritesOnly}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            activeTab={activeTab}
           />
         </Catalogue>
       )}

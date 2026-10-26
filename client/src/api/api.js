@@ -62,11 +62,13 @@ export function getItems(params = {}) {
     order: "order",
     page: "page",
     limit: "limit",
+    favourite: "favourite",
+    status: "status",
   };
 
   Object.entries(names).forEach(([key, backendName]) => {
     const value = params[key];
-    if (value !== undefined && value !== null && value !== "" && value !== "all") {
+    if (value !== undefined && value !== null && value !== "" && value !== "all" && value !== "false") {
       query.set(backendName, value);
     }
   });
@@ -81,6 +83,11 @@ export function createItem(item) {
 
 export function updateItem(id, item) {
   return request(`/api/items/${id}`, { method: "PUT", body: JSON.stringify(item) });
+}
+
+// Change only some fields of an item, for example { favourite: true }
+export function patchItem(id, changes) {
+  return request(`/api/items/${id}`, { method: "PATCH", body: JSON.stringify(changes) });
 }
 
 export function deleteItem(id) {
