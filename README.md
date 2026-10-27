@@ -227,17 +227,6 @@ Response:
 - `404`: no item with that id
 - `503`: the database is unreachable or not configured
 
-## Screenshots
-
-Add your screenshots to `docs/screenshots/` and reference them here.
-
-<!-- Example:
-![Home page, light](docs/screenshots/home-light.png)
-![Home page, dark](docs/screenshots/home-dark.png)
-![List view](docs/screenshots/list-view.png)
-![Add form](docs/screenshots/add-form.png)
--->
-
 ## Future improvements
 
 - Deploy the frontend and backend
